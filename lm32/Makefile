@@ -8,7 +8,7 @@ QSTR_DEFS = qstrdefsport.h
 # include py core make definitions
 include ../py/py.mk
 
-CROSS_COMPILE = or1k-elf-
+CROSS_COMPILE = lm32-elf-
 
 INC += -I.
 INC += -I..
@@ -26,7 +26,7 @@ CFLAGS += -Os -DNDEBUG
 endif
 
 # TODO: add linker script path here
-LDFLAGS = -nostdlib -T lm32.ld -Map=$@.map --cref
+LDFLAGS = -nostdlib -T linker.ld -Map=$@.map --cref
 LIBS =
 
 SRC_C = \
