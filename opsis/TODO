@@ -1,0 +1,3 @@
+ - fix linker script so we don't depend on ordering of link line in makefile
+ - use uart driver from libbase
+ - work out how to bring in support libraries
