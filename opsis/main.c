@@ -9,6 +9,8 @@
 #include "py/gc.h"
 #include "lib/utils/pyexec.h"
 
+void isr(void) { }
+
 void __do_global_dtors_aux(void)
 {
 	return;
