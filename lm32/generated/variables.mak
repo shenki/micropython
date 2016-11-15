@@ -1,0 +1,13 @@
+TRIPLE=lm32-elf
+CPU=lm32
+CPUFLAGS=-mbarrel-shift-enabled -mmultiply-enabled -mdivide-enabled -msign-extend-enabled
+CPUENDIANNESS=big
+CLANG=0
+SOC_DIRECTORY=/home/joel/dev/minispartan6/litex/litex/soc
+BUILDINC_DIRECTORY=/home/joel/dev/minispartan6/opsis-soc/build/minispartan_base/software/include
+LIBBASE_DIRECTORY=/home/joel/dev/minispartan6/litex/litex/soc/software/libbase
+LIBCOMPILER_RT_DIRECTORY=/home/joel/dev/minispartan6/litex/litex/soc/software/libcompiler_rt
+LIBNET_DIRECTORY=/home/joel/dev/minispartan6/litex/litex/soc/software/libnet
+BIOS_DIRECTORY=/home/joel/dev/minispartan6/litex/litex/soc/software/bios
+LIBUIP_DIRECTORY=/home/joel/dev/minispartan6/opsis-soc/firmware/libuip
+FIRMWARE_DIRECTORY=/home/joel/dev/minispartan6/opsis-soc/firmware
