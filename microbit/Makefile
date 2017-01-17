@@ -48,11 +48,15 @@ SRC_S = \
 
 OBJ = $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o) $(SRC_S:.S=.o))
 
-all: $(BUILD)/firmware.elf
+all: $(BUILD)/firmware.hex
 
 $(BUILD)/firmware.elf: $(OBJ)
 	$(ECHO) "LINK $@"
 	$(Q)$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(Q)$(SIZE) $@
+
+$(BUILD)/firmware.hex: $(BUILD)/firmware.elf
+	$(Q)$(OBJCOPY) -O ihex $^ $@
+	srec_cat $@ -intel -o $@ -intel --line-length=44
 
 include ../py/mkrules.mk
