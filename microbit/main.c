@@ -83,14 +83,7 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 
 static char *stack_top;
 
-int main(int argc, char **argv) {
-    serial_init(&s, USBTX, USBRX);
-    serial_baud(&s, 115200);
-    char msg[] = "micro:bit!\n";
-    mp_hal_stdout_tx_strn_cooked(msg, sizeof(msg));
-
-    mp_hal_set_interrupt_char(3);
-
+void mp_run(void) {
     int stack_dummy;
     stack_top = (char*)&stack_dummy;
     mp_stack_ctrl_init();
@@ -104,15 +97,26 @@ int main(int argc, char **argv) {
     do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
     do_str("for i in range(10):\n  print(i)", MP_PARSE_FILE_INPUT);
 
-
     for (;;) {
         if (pyexec_friendly_repl() != 0) {
             break;
         }
-
     }
 
     mp_deinit();
+}
+
+int main(int argc, char **argv) {
+    serial_init(&s, USBTX, USBRX);
+    serial_baud(&s, 115200);
+    char msg[] = "micro:bit!\n";
+    mp_hal_stdout_tx_strn_cooked(msg, sizeof(msg));
+    mp_hal_set_interrupt_char(3);
+
+    while (1) {
+        mp_run();
+    }
+
     return 0;
 }
 
