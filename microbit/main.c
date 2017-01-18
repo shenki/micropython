@@ -28,11 +28,11 @@ caddr_t _sbrk(int incr) {
 }
 
 void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
-     for (; len > 0; --len) {
+    for (; len > 0; --len) {
         if (*str == '\n') {
-          serial_putc(&s, '\r');
-       }
-          serial_putc(&s, *str++);
+            serial_putc(&s, '\r');
+        }
+        serial_putc(&s, *str++);
     }
 }
 
@@ -56,13 +56,13 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 }
 
 int main(int argc, char **argv) {
-  serial_init(&s, USBTX, USBRX);
-  serial_baud(&s, 115200);
-  mp_init();
-  do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
-  do_str("for i in range(10):\n  print(i)", MP_PARSE_FILE_INPUT);
-  mp_deinit();
-  return 0;
+    serial_init(&s, USBTX, USBRX);
+    serial_baud(&s, 115200);
+    mp_init();
+    do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
+    do_str("for i in range(10):\n  print(i)", MP_PARSE_FILE_INPUT);
+    mp_deinit();
+    return 0;
 }
 
 mp_lexer_t *mp_lexer_new_from_file(const char *filename) {
