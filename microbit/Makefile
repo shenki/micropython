@@ -10,15 +10,24 @@ CROSS_COMPILE = arm-none-eabi-
 
 INC += -I.
 INC += -I..
+
+# mbed HAL headers
+INC += -Imbed/hal
 INC += -Imbed/common
 INC += -Imbed/api
-INC += -Imbed/hal
+
+# CMSIS headers
 INC += -Imbed/targets/cmsis
+
+# CMSIS headers for NRF51822
 INC += -Imbed/targets/cmsis/TARGET_NORDIC/TARGET_MCU_NRF51822
+
+# mbed HAL implementation for NRF51822
 INC += -Imbed/targets/hal/TARGET_NORDIC/TARGET_MCU_NRF51822
 INC += -Imbed/targets/hal/TARGET_NORDIC/TARGET_MCU_NRF51822/TARGET_NRF51_MICROBIT
-INC += -I$(BUILD)
 
+# For qstr outputs.
+INC += -I$(BUILD)
 
 CFLAGS += -DNRF51 -DTARGET_NORDIC -DTARGET_M0 -D__MBED__=1 -DMCU_NORDIC_16K
 CFLAGS += -DTARGET_NRF51_MICROBIT -DTARGET_MCU_NORDIC_16K
@@ -38,17 +47,36 @@ LDFLAGS = -L mbed/targets/cmsis/TARGET_NORDIC/TARGET_MCU_NRF51822/TOOLCHAIN_GCC_
 LIBS =
 LDFLAGS += -Wl,--start-group -lnosys -lm -lc -lgcc -Wl,--end-group  --specs=nano.specs -mabi=aapcs
 
+SRC_LIB =$(addprefix lib/,\
+    mp-readline/readline.c \
+	utils/pyexec.c \
+	utils/interrupt_char.c \
+	)
+
 SRC_C = \
-	main.c \
+	main.c
+
+SRC_CMSIS = \
 	mbed/targets/cmsis/TARGET_NORDIC/TARGET_MCU_NRF51822/cmsis_nvic.c \
-	mbed/targets/cmsis/TARGET_NORDIC/TARGET_MCU_NRF51822/system_nrf51.c \
+	mbed/targets/cmsis/TARGET_NORDIC/TARGET_MCU_NRF51822/system_nrf51.c
+
+SRC_HAL = \
+    mbed/common/ticker_api.c \
+    mbed/common/us_ticker_api.c \
 	mbed/targets/hal/TARGET_NORDIC/TARGET_MCU_NRF51822/pinmap.c \
-	mbed/targets/hal/TARGET_NORDIC/TARGET_MCU_NRF51822/serial_api.c
+	mbed/targets/hal/TARGET_NORDIC/TARGET_MCU_NRF51822/serial_api.c \
+	mbed/targets/hal/TARGET_NORDIC/TARGET_MCU_NRF51822/us_ticker.c
 
 SRC_S = \
 	mbed/targets/cmsis/TARGET_NORDIC/TARGET_MCU_NRF51822/TOOLCHAIN_GCC_ARM/startup_NRF51822.S
 
-OBJ = $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o) $(SRC_S:.S=.o))
+OBJ =
+OBJ += $(PY_O)
+OBJ += $(addprefix $(BUILD)/, $(SRC_LIB:.c=.o))
+OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
+OBJ += $(addprefix $(BUILD)/, $(SRC_S:.S=.o))
+OBJ += $(addprefix $(BUILD)/, $(SRC_CMSIS:.c=.o))
+OBJ += $(addprefix $(BUILD)/, $(SRC_HAL:.c=.o))
 
 .PHONY: pyodc gdb all
 

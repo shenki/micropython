@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+#include "mpconfigboard.h"
+
 // options to control how Micro Python is built
 
 #define MICROPY_QSTR_BYTES_IN_HASH  (1)
@@ -14,7 +16,7 @@
 #define MICROPY_MEM_STATS           (0)
 #define MICROPY_DEBUG_PRINTERS      (0)
 #define MICROPY_ENABLE_GC           (1)
-#define MICROPY_HELPER_REPL         (0)
+#define MICROPY_HELPER_REPL         (1)
 #define MICROPY_HELPER_LEXER_UNIX   (0)
 #define MICROPY_ENABLE_SOURCE_LINE  (0)
 #define MICROPY_ENABLE_DOC_STRING   (0)
@@ -43,19 +45,25 @@
 #define MICROPY_LONGINT_IMPL        (MICROPY_LONGINT_IMPL_NONE)
 #define MICROPY_FLOAT_IMPL          (MICROPY_FLOAT_IMPL_NONE)
 #define MICROPY_USE_INTERNAL_PRINTF (1)
+#define MICROPY_KBD_EXCEPTION       (1)
 
 // type definitions for the specific machine
 
-#define BYTES_PER_WORD (4)
+#define MP_STATE_PORT MP_STATE_VM
+
+#define MICROPY_PORT_ROOT_POINTERS \
+    const char *readline_hist[8];
 
 #define MICROPY_MAKE_POINTER_CALLABLE(p) ((void*)((mp_uint_t)(p) | 1))
 
-#define UINT_FMT "%lu"
-#define INT_FMT "%ld"
+#define UINT_FMT "%u"
+#define INT_FMT "%d"
 
-typedef int32_t mp_int_t; // must be pointer size
-typedef uint32_t mp_uint_t; // must be pointer size
+typedef intptr_t mp_int_t; // must be pointer size
+typedef uintptr_t mp_uint_t; // must be pointer size
 typedef long mp_off_t;
+
+#define BYTES_PER_WORD (sizeof(mp_uint_t))
 
 // dummy print
 #define MP_PLAT_PRINT_STRN(str, len) mp_hal_stdout_tx_strn_cooked(str, len)

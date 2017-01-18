@@ -9,7 +9,11 @@
 #include "py/repl.h"
 #include "py/stackctrl.h"
 
+#include "lib/utils/pyexec.h"
+#include "lib/utils/interrupt_char.h"
+
 #include "serial_api.h"
+#include "us_ticker_api.h"
 
 serial_t s;
 
@@ -29,6 +33,22 @@ caddr_t _sbrk(int incr) {
     return (caddr_t) prev_heap;
 }
 
+int mp_hal_stdin_rx_chr(void) {
+    for (;;) {
+        return serial_getc(&s);
+    }
+}
+
+void mp_hal_stdout_tx_strn(const char *str, size_t len) {
+    for (; len > 0; --len) {
+        serial_putc(&s, *str++);
+    }
+}
+
+void mp_hal_stdout_tx_str(const char *str) {
+    mp_hal_stdout_tx_strn(str, strlen(str));
+}
+
 void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
     for (; len > 0; --len) {
         if (*str == '\n') {
@@ -36,6 +56,10 @@ void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
         }
         serial_putc(&s, *str++);
     }
+}
+
+mp_uint_t mp_hal_ticks_ms(void) {
+    return us_ticker_read() / 1000;
 }
 
 void do_str(const char *src, mp_parse_input_kind_t input_kind) {
@@ -65,18 +89,29 @@ int main(int argc, char **argv) {
     char msg[] = "micro:bit!\n";
     mp_hal_stdout_tx_strn_cooked(msg, sizeof(msg));
 
+    mp_hal_set_interrupt_char(3);
+
     int stack_dummy;
     stack_top = (char*)&stack_dummy;
     mp_stack_ctrl_init();
-    mp_stack_set_limit(1000);
+    mp_stack_set_limit(1800);
 
     // allocate the heap statically in the bss
-    static uint8_t heap[2000];
+    static uint8_t heap[10240];
     gc_init(heap, heap + sizeof(heap));
 
     mp_init();
     do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
     do_str("for i in range(10):\n  print(i)", MP_PARSE_FILE_INPUT);
+
+
+    for (;;) {
+        if (pyexec_friendly_repl() != 0) {
+            break;
+        }
+
+    }
+
     mp_deinit();
     return 0;
 }
