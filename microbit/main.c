@@ -4,8 +4,10 @@
 
 #include "py/nlr.h"
 #include "py/compile.h"
+#include "py/gc.h"
 #include "py/runtime.h"
 #include "py/repl.h"
+#include "py/stackctrl.h"
 
 #include "serial_api.h"
 
@@ -55,9 +57,23 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
     }
 }
 
+static char *stack_top;
+
 int main(int argc, char **argv) {
     serial_init(&s, USBTX, USBRX);
     serial_baud(&s, 115200);
+    char msg[] = "micro:bit!\n";
+    mp_hal_stdout_tx_strn_cooked(msg, sizeof(msg));
+
+    int stack_dummy;
+    stack_top = (char*)&stack_dummy;
+    mp_stack_ctrl_init();
+    mp_stack_set_limit(1000);
+
+    // allocate the heap statically in the bss
+    static uint8_t heap[2000];
+    gc_init(heap, heap + sizeof(heap));
+
     mp_init();
     do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
     do_str("for i in range(10):\n  print(i)", MP_PARSE_FILE_INPUT);
@@ -91,3 +107,12 @@ void MP_WEAK __assert_func(const char *file, int line, const char *func, const c
     __fatal_error("Assertion failed");
 }
 #endif
+
+void gc_collect(void) {
+    // WARNING: This gc_collect implementation doesn't try to get root
+    // pointers from CPU registers, and thus may function incorrectly.
+    void *dummy;
+    gc_collect_start();
+    gc_collect_root(&dummy, ((mp_uint_t)stack_top - (mp_uint_t)&dummy) / sizeof(mp_uint_t));
+    gc_collect_end();
+}
