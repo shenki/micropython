@@ -7,8 +7,34 @@
 #include "py/runtime.h"
 #include "py/repl.h"
 
+#include "serial_api.h"
 
-int _sbrk() {return 0;}
+serial_t s;
+
+extern int __end__;
+extern uint32_t  __HeapLimit;
+
+caddr_t _sbrk(int incr) {
+    static unsigned char* heap = (unsigned char*)&__end__;
+    unsigned char*        prev_heap = heap;
+    unsigned char*        new_heap = heap + incr;
+
+    if (new_heap >= (unsigned char*)&__HeapLimit) {     /* __HeapLimit is end of heap section */
+        return (caddr_t)-1;
+    }
+
+    heap = new_heap;
+    return (caddr_t) prev_heap;
+}
+
+void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
+     for (; len > 0; --len) {
+        if (*str == '\n') {
+          serial_putc(&s, '\r');
+       }
+          serial_putc(&s, *str++);
+    }
+}
 
 void do_str(const char *src, mp_parse_input_kind_t input_kind) {
     mp_lexer_t *lex = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
@@ -30,11 +56,13 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 }
 
 int main(int argc, char **argv) {
-    mp_init();
-    do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
-    do_str("for i in range(10):\n  print(i)", MP_PARSE_FILE_INPUT);
-    mp_deinit();
-    return 0;
+  serial_init(&s, USBTX, USBRX);
+  serial_baud(&s, 115200);
+  mp_init();
+  do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
+  do_str("for i in range(10):\n  print(i)", MP_PARSE_FILE_INPUT);
+  mp_deinit();
+  return 0;
 }
 
 mp_lexer_t *mp_lexer_new_from_file(const char *filename) {

@@ -58,7 +58,7 @@ typedef uint32_t mp_uint_t; // must be pointer size
 typedef long mp_off_t;
 
 // dummy print
-#define MP_PLAT_PRINT_STRN(str, len) (void)0
+#define MP_PLAT_PRINT_STRN(str, len) mp_hal_stdout_tx_strn_cooked(str, len)
 
 // extra built in names to add to the global namespace
 #define MICROPY_PORT_BUILTINS \
