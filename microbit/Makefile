@@ -50,6 +50,8 @@ SRC_S = \
 
 OBJ = $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o) $(SRC_S:.S=.o))
 
+.PHONY: pyodc gdb all
+
 all: $(BUILD)/firmware.hex
 
 $(BUILD)/firmware.elf: $(OBJ)
