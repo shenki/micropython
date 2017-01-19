@@ -30,6 +30,7 @@ SRC_C = \
 	uart.c \
 	isr.c \
 	lib/utils/stdout_helpers.c \
+	lib/utils/interrupt_char.c \
 	lib/utils/pyexec.c \
 	lib/libc/string0.c \
 	lib/mp-readline/readline.c \
@@ -48,11 +49,11 @@ $(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
 
 $(BUILD)/firmware.elf: $(OBJ)
 	$(ECHO) "LINK $@"
-	$(Q)$(LD) $(LIBS) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(Q)$(LD) $^ $(LDFLAGS) -o $@ $(LIBS)
 	$(Q)$(SIZE) $@
 
 $(BUILD)/firmware.bin: $(BUILD)/firmware.elf
-	$(Q)$(OBJCOPY) -O binary -j .isr_vector -j .text -j .data $^ $(BUILD)/firmware.bin
+	$(Q)$(OBJCOPY) -O binary $^ $(BUILD)/firmware.bin
 
 deploy: $(BUILD)/firmware.bin
 	$(ECHO) "TODO: write to the board"
