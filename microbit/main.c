@@ -22,8 +22,8 @@ extern uint32_t  __HeapLimit;
 
 caddr_t _sbrk(int incr) {
     static unsigned char* heap = (unsigned char*)&__end__;
-    unsigned char*        prev_heap = heap;
-    unsigned char*        new_heap = heap + incr;
+    unsigned char* prev_heap = heap;
+    unsigned char* new_heap = heap + incr;
 
     if (new_heap >= (unsigned char*)&__HeapLimit) {     /* __HeapLimit is end of heap section */
         return (caddr_t)-1;
@@ -60,6 +60,26 @@ void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
 
 mp_uint_t mp_hal_ticks_ms(void) {
     return us_ticker_read() / 1000;
+}
+
+mp_uint_t mp_hal_ticks_us(void) {
+    return us_ticker_read();
+}
+
+void mp_hal_delay_ms(mp_uint_t ms) {
+    mp_uint_t f = mp_hal_ticks_ms() + ms;
+    while (mp_hal_ticks_ms() < f) {
+    }
+}
+
+void mp_hal_delay_us(mp_uint_t us) {
+    mp_uint_t f = mp_hal_ticks_us() + us;
+    while (mp_hal_ticks_us() < f) {
+    }
+}
+
+mp_uint_t mp_hal_ticks_cpu(void) {
+    return mp_hal_ticks_us() * 1000;
 }
 
 void do_str(const char *src, mp_parse_input_kind_t input_kind) {

@@ -54,7 +54,8 @@ SRC_LIB =$(addprefix lib/,\
 	)
 
 SRC_C = \
-	main.c
+	main.c \
+    modutime.c
 
 SRC_CMSIS = \
 	mbed/targets/cmsis/TARGET_NORDIC/TARGET_MCU_NRF51822/cmsis_nvic.c \
@@ -77,6 +78,9 @@ OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_S:.S=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CMSIS:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_HAL:.c=.o))
+
+# List of sources for qstr extraction
+SRC_QSTR += $(SRC_C) $(SRC_LIB)
 
 .PHONY: pyodc gdb all
 
